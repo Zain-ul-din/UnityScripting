@@ -2,7 +2,6 @@ public static class SceneLoaderManager
 {
   public enum SceneName 
   {
-SceneManagerDemo,
 
   }
   

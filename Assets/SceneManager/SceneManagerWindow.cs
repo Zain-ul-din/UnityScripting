@@ -4,12 +4,16 @@
   Contribute on GitHub : https://github.com/Zain-ul-din/UnityScripting
 */
 
+#if UNITY_EDITOR
+
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEditor;
 
+  
 public class SceneManagerWindow : EditorWindow
 {
     /// <summary>
@@ -28,11 +32,11 @@ public class SceneManagerWindow : EditorWindow
     /// </summary>
     private void OnGUI ()
     {
-      #if UNITY_EDITOR  
        SceneLoaderWindow ();
        UpdateSceneManagerScript ();
-      #endif
     }
+    
+    Vector2 scrollPos;
 
     /// <summary>
     /// Scene Loader Ui Renderer
@@ -40,6 +44,7 @@ public class SceneManagerWindow : EditorWindow
     private void SceneLoaderWindow ()
     {
       var scenesPath = SceneManagerUtil.BuildScenesPath ();
+      
       if (scenesPath.Count == 0)
       {
        GUILayout.Label("Warning : No Scene Added So Far", EditorStyles.helpBox);
@@ -49,25 +54,49 @@ public class SceneManagerWindow : EditorWindow
         window.Show ();
        }
       }
-
+      GUILayoutOption[] options = new GUILayoutOption[]
+      {
+             //add more layout options
+      };
+      // scrollPos = EditorGUILayout.BeginScrollView(scrollPos, true, false, GUILayout.Width(this.position.width ), GUILayout.Height(this.position.height));
+      // EditorGUILayout.BeginScrollView(scrollPos, GUIStyle.none, GUI.skin.verticalScrollbar);
+      scrollPos = GUILayout.BeginScrollView(scrollPos, false, false, GUIStyle.none, GUI.skin.verticalScrollbar);
+      GUILayout.Space (20);
       foreach (var scenePath in scenesPath )
       {
         if (GUILayout.Button (SceneManagerUtil.GetSceneName(scenePath), EditorStyles.miniButton)) 
         {
           EditorSceneManager.OpenScene (scenePath);
-          // TODODS: Add Scene in-side window Option :-)
         } 
+        GUILayout.Space (5);
+      }
+      GUILayout.Space (20);
+      EditorGUILayout.EndScrollView ();
+      
+      GUILayout.Space (20);
+      
+      GUILayout.BeginHorizontal ();
+      if (GUILayout.Button ("Open Scene Editor",EditorStyles.miniButtonMid))
+      {
+        EditorWindow window = GetWindow (typeof (SceneEditorWindow), true);
+        window.Show ();
       }
       
-      GUILayout.Space (30);
-      if (GUILayout.Button ("Refresh"))
+      
+      if (GUILayout.Button ("Refresh", EditorStyles.miniButtonMid,GUILayout.Width (60)))
+      {
+        AssetDatabase.SaveAssets ();
+      }
+      
+      if (GUILayout.Button ("Reload", EditorStyles.miniButtonMid, GUILayout.Width (60)))
       {
         AssetDatabase.Refresh ();
       }
 
+      GUILayout.EndHorizontal ();
       GUILayout.Label("SceneManager Window", EditorStyles.centeredGreyMiniLabel);  
     } 
-    
+
     /// <summary>
     /// Updates changes in script
     /// </summary>
@@ -141,5 +170,145 @@ $
 }";   
       File.WriteAllText (scriptPath, fileContent.Replace ("$",enumVal));
     }
+
+  /* IO APIS */
+
+  /// <summary>
+  /// Returns all files path of a given type
+  /// USAGE : GetFilesOfType ("*.cs");
+  /// </summary>
+  public static string[] GetFilesOfType (string fileExtension) 
+  {
+    string root = Application.dataPath;
+    return System.IO.Directory.GetFiles (root, fileExtension, System.IO.SearchOption.AllDirectories);
+  }
+   
+  /// <summary>
+  /// returns files info like: fileName, relative Path
+  /// Usage : GetFilesInfoOfType ("*.cs")
+  /// </summary>
+  public static List <FileInfo> GetFilesInfoOfType (string fileExtension)
+  {
+    List<FileInfo> FilesInfo = new List<FileInfo> ();
+    foreach (string fileAbsPath in GetFilesOfType (fileExtension))
+    {
+      string relativepath =  ("Assets" + fileAbsPath.Substring(Application.dataPath.Length)).Replace ("\\","/");
+      string fileName = System.IO.Path.GetFileName (fileAbsPath).Split ('.')[0];
+      FilesInfo.Add (new FileInfo {fileName = fileName, relativepath = relativepath});
+    }
+    return FilesInfo;
+  } 
+
+  /// <summary>
+  /// Opens a path in project window
+  /// <summary>
+  public static void FocusOnPath (string path)
+  {
+    UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath(path, typeof(UnityEngine.Object));
+    Selection.activeObject = obj;
+    EditorGUIUtility.PingObject(obj);
+  }
+  
+  public class FileInfo 
+  {
+    public string fileName, relativepath;
+    public override string ToString () => $"SceneName : {fileName} , Path : {relativepath}";
+  }     
+  
+  /// <summmary>
+  /// Ads scene to build setting
+  /// </summary>
+  public static void AddSceneToBuild (string sceneRelativePath)
+  {
+    var original = EditorBuildSettings.scenes; 
+    if (original.Where (scene => scene.path == sceneRelativePath).ToArray().Length > 0) return; // already in build settings
+    var newSettings = new EditorBuildSettingsScene[original.Length + 1]; 
+    System.Array.Copy(original, newSettings, original.Length); 
+    var sceneToAdd = new EditorBuildSettingsScene(sceneRelativePath, true); 
+    newSettings[newSettings.Length - 1] = sceneToAdd; 
+    EditorBuildSettings.scenes = newSettings;
+  }
+
+  /// <summmary>
+  /// Removes scene from build
+  /// </summary>
+  public static void RemoveSceneFromBuild (string sceneRelativePath)
+  {
+    EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
+    EditorBuildSettings.scenes = scenes.Where (scene => scene.path != sceneRelativePath).ToArray();
+  }
 }
 
+public class SceneEditorWindow : EditorWindow
+{
+  
+  void OnGUI()
+  {
+    RenderWindow();
+  }
+  Vector2 scrollPos, scrollPosition;
+  /// <summary>
+  /// Render main window
+  /// </summary>
+  private void RenderWindow ()
+  {
+    var scenesInfo = SceneManagerUtil.GetFilesInfoOfType ("*.unity");
+    scrollPos = EditorGUILayout.BeginScrollView(scrollPos, true, false, GUILayout.Width(this.position.width ), GUILayout.Height(this.position.height));
+    Header();
+    foreach (SceneManagerUtil.FileInfo info in scenesInfo) 
+    {
+      GUILayout.BeginHorizontal();
+      GUILayout.Space (30);
+
+      if (GUILayout.Button(info.fileName, UnityEditor.EditorStyles.miniButtonLeft, GUILayout.Width(300)))
+      {
+        EditorSceneManager.OpenScene (info.relativepath);
+      }
+      
+      GUILayout.Space (30);
+
+      if (GUILayout.Button("+", UnityEditor.EditorStyles.miniButtonRight, GUILayout.Width(20)))
+      {
+        SceneManagerUtil.AddSceneToBuild (info.relativepath);
+        AssetDatabase.SaveAssets ();
+      }
+      
+      if (GUILayout.Button("-", UnityEditor.EditorStyles.miniButtonRight, GUILayout.Width(20)))
+      {  
+        SceneManagerUtil.RemoveSceneFromBuild(info.relativepath);
+        AssetDatabase.SaveAssets ();
+      }
+      
+      if (GUILayout.Button("Focus", UnityEditor.EditorStyles.miniButtonRight, GUILayout.Width(50)))
+      {  
+        SceneManagerUtil.FocusOnPath (info.relativepath);
+      }
+
+      GUILayout.EndHorizontal();
+    }
+
+    GUILayout.Space (10);
+    GUILayout.Label("SceneManager Window", EditorStyles.centeredGreyMiniLabel);   
+    EditorGUILayout.EndScrollView();   
+  }
+  
+  /// <summary>
+  /// Window Header
+  /// </summary>
+  private void Header ()
+  {
+    GUILayout.Space (30);
+    if (GUILayout.Button ("Show Build"))
+    {
+      EditorWindow window = GetWindow (typeof (BuildPlayerWindow),false);
+      window.Show ();
+    }
+    GUILayout.Space (30);
+    GUILayout.BeginHorizontal();
+    GUILayout.Button ("Scenes",EditorStyles.centeredGreyMiniLabel,GUILayout.Width (300));
+    GUILayout.EndHorizontal ();
+    GUILayout.Space (5);
+  }
+}
+
+#endif
