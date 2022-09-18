@@ -2,7 +2,6 @@
 /*
   OPEN_SOURCE
   Contribute on GitHub : https://github.com/Zain-ul-din/UnityScripting
-  TODOS: https://stackoverflow.com/questions/73749813/how-to-unfocus-guilayout-textfield-onclick-outside
 */
 
 #if UNITY_EDITOR
@@ -20,8 +19,10 @@ public class SceneManagerWindow : EditorWindow
 
     /// <summary>
     /// Draws Scene Manager Window 
+    /// MenuItem: https://hugecalf-studios.github.io/unity-lessons/lessons/editor/menuitem/
+    // %	Ctrl/Command #	Shift &	Alt _	None
     /// </summary>
-    [MenuItem ("Randoms/SceneManager")]
+    [MenuItem ("Randoms/SceneManager #s")]
     private static void DrawWindow ()
     {
       bool drawFixedWindow = false;
@@ -83,7 +84,7 @@ public class SceneManagerWindow : EditorWindow
         } 
 
         GUILayout.Space (5);
-        if (GUILayout.Button ("-", EditorStyles.miniButtonMid, GUILayout.Width (50)))
+        if (SceneManagerUtil.GUIButton ("-",Color.red,Color.red,Color.red,30,30))
         {
           SceneManagerUtil.RemoveSceneFromBuild (scenePath);
           AssetDatabase.SaveAssets ();
@@ -100,25 +101,33 @@ public class SceneManagerWindow : EditorWindow
       GUILayout.Space (20);
       
       GUILayout.BeginHorizontal ();
-
+       
+      GUILayout.Space (10);
       if (GUILayout.Button ("Open Scene Editor",EditorStyles.miniButtonMid))
       {
+        searchText = "";
         EditorWindow window = GetWindow (typeof (SceneEditorWindow), true);
         window.Show ();
       }
       
+      GUILayout.Space (10);
       if (GUILayout.Button ("Refresh", EditorStyles.miniButtonMid,GUILayout.Width (60)))
       {
+        searchText = "";
         AssetDatabase.SaveAssets ();
       }
       
+      GUILayout.Space (10);
       if (GUILayout.Button ("Reload", EditorStyles.miniButtonMid, GUILayout.Width (60)))
       {
+        searchText = "";
         AssetDatabase.Refresh ();
       }
 
+      GUILayout.Space (10);
       GUILayout.EndHorizontal ();
       GUILayout.Label("SceneManager Window", EditorStyles.centeredGreyMiniLabel);  
+      GUILayout.Space (5);
     } 
 
     /// <summary>
@@ -134,7 +143,14 @@ public class SceneManagerWindow : EditorWindow
        newSceneNameEnum += "   " + SceneManagerUtil.GetSceneName (path) + "\n, ";
       SceneManagerUtil.UpdateSceneLoaderScript (scriptPath, newSceneNameEnum);
     }
-
+    
+    /// <summary>
+    /// On Winow UnFocus
+    /// </summary>
+    void OnLostFocus()
+    {
+      GUI.FocusControl (null);
+    }
 }
 
 public class SceneEditorWindow : EditorWindow
@@ -167,26 +183,35 @@ public class SceneEditorWindow : EditorWindow
       GUILayout.BeginHorizontal();
       GUILayout.Space (30);
       
-      if (GUILayout.Button(info.fileName, UnityEditor.EditorStyles.miniButtonLeft, GUILayout.Width(300)))
+      // if (GUILayout.Button(info.fileName, UnityEditor.EditorStyles.miniButtonMid, GUILayout.Width(300)))
+      if (SceneManagerUtil.GUIButton (info.fileName, Color.white, Color.white, 12, 300))
       {
         EditorSceneManager.OpenScene (info.relativepath);
       }
       
       GUILayout.Space (30);
-
-      if (GUILayout.Button("+", UnityEditor.EditorStyles.miniButtonRight, GUILayout.Width(20)))
+      
+      
+      GUILayout.Space (3);
+      if (SceneManagerUtil.GUIButton ("+", Color.green, Color.green, 20, 20))
       {
         SceneManagerUtil.AddSceneToBuild (info.relativepath);
         AssetDatabase.SaveAssets ();
       }
       
-      if (GUILayout.Button("-", UnityEditor.EditorStyles.miniButtonRight, GUILayout.Width(20)))
+      var redBtnStyle = new GUIStyle (EditorStyles.miniButtonMid);
+      redBtnStyle.normal.textColor = Color.red;
+      
+      GUILayout.Space (3);
+      if (SceneManagerUtil.GUIButton ("-", Color.red, Color.red, 20, 20))
       {  
         SceneManagerUtil.RemoveSceneFromBuild(info.relativepath);
         AssetDatabase.SaveAssets ();
       }
       
-      if (GUILayout.Button("Focus", UnityEditor.EditorStyles.miniButtonRight, GUILayout.Width(50)))
+      GUILayout.Space (3);
+      // if (GUILayout.Button("Focus", UnityEditor.EditorStyles.miniButtonMid, GUILayout.Width(50)))
+      if (SceneManagerUtil.GUIButton ("Focus", Color.grey, Color.gray, 12))
       {  
         SceneManagerUtil.FocusOnPath (info.relativepath);
       }
@@ -206,16 +231,15 @@ public class SceneEditorWindow : EditorWindow
   {
     GUILayout.Space (30);
     GUILayout.BeginHorizontal ();
-    
-    GUILayout.Space (5);
-    if (GUILayout.Button ("Show Build",EditorStyles.miniButtonMid))
+    GUILayout.Space (30);
+    if (SceneManagerUtil.GUIButton ("Show Build", Color.white, Color.white, 12, 140))
     {
       EditorWindow window = GetWindow (typeof (BuildPlayerWindow),false);
       window.Show ();
     }
     
     GUILayout.Space (5); 
-    if (GUILayout.Button ("Add All",EditorStyles.miniButtonMid))
+    if (SceneManagerUtil.GUIButton ("Add All", Color.green, Color.green, 12, 140))
     {
       // var scenesInfo = SceneManagerUtil.GetFilesInfoOfType ("*.unity");
       // filterInfos.ForEach (scene => SceneManagerUtil.AddSceneToBuild (scene.relativepath));
@@ -224,7 +248,7 @@ public class SceneEditorWindow : EditorWindow
     }
     
     GUILayout.Space (5); 
-    if (GUILayout.Button ("Remove All",EditorStyles.miniButtonMid))
+    if (SceneManagerUtil.GUIButton ("Remove All", Color.red, Color.red, 12, 140))
     {
       // var scenesInfo = SceneManagerUtil.GetFilesInfoOfType ("*.unity");
       // scenesInfo.ForEach (scene => SceneManagerUtil.RemoveSceneFromBuild (scene.relativepath));
@@ -242,6 +266,13 @@ public class SceneEditorWindow : EditorWindow
     GUILayout.Space (5);
   }
   
+  /// <summary>
+  /// On Winow UnFocus
+  /// </summary>
+  void OnLostFocus()
+  {
+    GUI.FocusControl (null);
+  }
 }
 
 /// Utilities
@@ -361,11 +392,63 @@ public static class SceneManagerUtil
     GUILayout.BeginHorizontal();
     GUILayout.Space (marginLeft);
     GUILayout.Label(aLabel, GUILayout.MaxWidth (100));
-    aText = GUILayout.TextField(aText,GUILayout.Width (320));
+    aText = GUILayout.TextField(aText.Trim(),GUILayout.Width (320));
+    if (Event.current.type == EventType.MouseDown)
+    {
+      GUI.FocusControl (null);
+    }
     GUILayout.EndHorizontal();
     GUILayout.Space (5);
     return aText;
   }
+  
+  /// <summary>
+  /// Custom Button
+  /// <summary>
+  public static bool GUIButton (string text, Color normalColor, Color activeColor, int fontSize,int width = 50)
+  {
+    var style = new GUIStyle(EditorStyles.miniButtonMid);
+    style.normal.textColor = normalColor;
+    style.active.textColor = activeColor;
+    style.fontSize = fontSize;
+    style.fontStyle = FontStyle.Bold;
+    return GUILayout.Button (text, style, GUILayout.Width (width));
+  }
+
+  /// <summary>
+  /// Custom Button
+  /// <summary>
+  public static bool GUIButton (string text, Color normalColor, Color activeColor, Color backgroundColor, int fontSize, int width = 50)
+  {
+    var style = new GUIStyle(EditorStyles.miniButtonMid);
+    style.normal.textColor = normalColor;
+    style.active.textColor = activeColor;
+    style.fontSize = fontSize;
+    style.fontStyle = FontStyle.Bold;
+    style.normal.background = DrawTexture (width, 10, backgroundColor); 
+    return GUILayout.Button (text, style, GUILayout.Width (width));
+  }
+
+  /// <summary>
+  /// Draws Texture
+  /// </summary>
+  public static Texture2D DrawTexture (int width, int height, Color textureColor)
+  {
+    Color[] pixels = new Color[width * height];
+
+    for (int i = 0; i < pixels.Length; i++)
+    {
+      pixels[i] = textureColor;
+    }
+
+    Texture2D backgroundTexture = new Texture2D(width, height);
+
+    backgroundTexture.SetPixels(pixels);
+    backgroundTexture.Apply();
+
+    return backgroundTexture;    
+  }
 }
+
 
 #endif
