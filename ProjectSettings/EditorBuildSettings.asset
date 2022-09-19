@@ -11,4 +11,85 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Preview/Preview.unity
     guid: 605ea6bbb8150014890a562ef8f79e8a
+  - enabled: 1
+    path: Assets/SceneManager/Demo/SceneManagerDemo.unity
+    guid: f7058c87a1f1889419b2d4352660e0c9
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_1.unity
+    guid: ec1fcfac93ce40d4ab86df939eb34206
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_101.unity
+    guid: 29275faa45f783c419e2342eb580bc3e
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_102.unity
+    guid: ab8b4c8db7780c641b637c9abdb5b59e
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_103.unity
+    guid: c8be0ca9b12808343b0d858737ffdfcb
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_104.unity
+    guid: 8ab8b4f46e0f39f44a534da5bd635be4
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_105.unity
+    guid: f31c408995a999049a258a417233a2b4
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_106.unity
+    guid: d25a900ae0817754789baf48182ea6b2
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_107.unity
+    guid: 3b46dd3d302ff7740a25cdc919d7a639
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_10.unity
+    guid: e7afe16e3e009ee45a6914f9a072df86
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_108.unity
+    guid: 8122915352d0d7148bbf5be51e96ed94
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_109.unity
+    guid: 5b3c82c3b11ac064f9d0b7c0acf0ed70
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_11.unity
+    guid: c5fff9d98b1d5c0469188626daa7c9d6
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_110.unity
+    guid: 7691c090e28b9ee468dade8123d8ef1f
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_111.unity
+    guid: 3f7e106cd9cf2904289f25b93f926e51
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_112.unity
+    guid: d71cbeeaf141ba7408eb86aa458cae1b
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_113.unity
+    guid: b86a9cb3b7e72d14eacf1c9b42ed2eed
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_114.unity
+    guid: d872f76fb651c8e4f920a82e6a10e60b
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_123.unity
+    guid: fe3aa961a490f54419a0eaa36c29a44e
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_124.unity
+    guid: 543e5bf2c6222154b81bcf258835859a
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_125.unity
+    guid: 077ccfbe8cab2444383022958f2b6aaa
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_138.unity
+    guid: ab9cca7ee44f82747a1f2dc8eb3c3d13
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_139.unity
+    guid: 93c5efec8e9887f4994c35f00af95097
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_143.unity
+    guid: ad17da9849a64984ba12a64d57944a9d
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_144.unity
+    guid: 7d0c49b3b9658674da9e18184f2276e0
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_151.unity
+    guid: c0f6a250cdf781f40bfe64d9fd661489
+  - enabled: 1
+    path: Assets/SceneManager/Test/Test_152.unity
+    guid: 553a761afb3aac648978e7ac99c118db
   m_configObjects: {}

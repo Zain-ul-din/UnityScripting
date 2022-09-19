@@ -1,0 +1,1 @@
+Feel free to delete EditorWindow folder before final build
