@@ -49,7 +49,7 @@ namespace Randoms.SceneManagerEditorWindow
           FileInfo fileInfo = new FileInfo (path);
           fileInfo.MoveTo(fileInfo.Directory.FullName + "\\" + fileInfo.Name.Replace (" ", "_"));  
         }
-        AssetDatabase.Refresh ();
+        // AssetDatabase.Refresh ();
       } 
   
       /// <summary>

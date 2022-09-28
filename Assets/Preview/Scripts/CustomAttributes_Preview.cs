@@ -6,10 +6,20 @@ using UnityEngine;
 public class CustomAttributes_Preview : MonoBehaviour
 {
 
+    
     [SerializeField] private float test;
+
+    public Dictionary <int,bool> dic;
+    
+    [ShowInInspector] public Vector3 vec;
+
+    
+    public GameObject game_Object;
+
     // Start is called before the first frame update
     void Start() {
         MyClass myClass = new MyClass();
+        // Instantiate (game_Object, Vector3.zero, Quaternion.identity);
     }
 
     // Update is called once per frame
