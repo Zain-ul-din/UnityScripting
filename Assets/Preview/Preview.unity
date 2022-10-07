@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 97931358}
   - component: {fileID: 97931360}
   - component: {fileID: 97931359}
+  - component: {fileID: 97931361}
   m_Layer: 0
   m_Name: Testing
   m_TagString: Untagged
@@ -189,6 +190,19 @@ MonoBehaviour:
   test: 2
   vec: {x: 0, y: 0, z: 0}
   game_Object: {fileID: 97931357}
+--- !u!114 &97931361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 97931357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fda14b46eb2d5e34eaacd0bfca340486, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  num: 0
 --- !u!1 &283342699
 GameObject:
   m_ObjectHideFlags: 0

@@ -292,8 +292,9 @@ namespace Randoms.Editor.Util
         
         private static GUIStyle miniUtilButton;
 
-
+        private static GUIStyle verticalScrollArea;
         
+
         /// <summary>
         /// Black label style.
         /// </summary>
@@ -1779,6 +1780,22 @@ namespace Randoms.Editor.Util
             }
         }
 
+        //
+        public static GUIStyle VerticalScrollArea 
+        {
+            get 
+            {
+                if (GUIStyleUtil.verticalScrollArea == null) 
+                {
+                    GUIStyle gUIStyle = new GUIStyle("sv_iconselector_labelselection");
+                    gUIStyle.padding = new RectOffset(10, 10, 5, 5);
+                    gUIStyle.margin = new RectOffset(0, 0, 0, 0);
+                    gUIStyle.stretchHeight = false;
+                    GUIStyleUtil.cardStyleMini = gUIStyle;
+                }
+                return GUIStyleUtil.verticalScrollArea;
+            }
+        }
         static GUIStyleUtil()
         {
             GUIStyleUtil.BorderColor = (EditorGUIUtility.isProSkin ? new Color(0.11f, 0.11f, 0.11f, 0.8f) : new Color(0.38f, 0.38f, 0.38f, 0.6f));
