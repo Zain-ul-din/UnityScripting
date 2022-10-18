@@ -147,8 +147,7 @@ namespace Randoms.Fun
                 var (aX,aY) = a;
                 var (bX,bY) = b;
                 var (cX,cY) = c;
-                 
-                Debug.Log (aX + " " + aY); 
+                
                 if (
                     matrix.matrix [aX, aY] != defaultCharSet
                     &&
