@@ -1,4 +1,4 @@
-﻿
+
 /*
   OPEN_SOURCE
   Contribute on GitHub : https://github.com/Zain-ul-din/UnityScripting
@@ -6,140 +6,201 @@
 
 #if UNITY_EDITOR
 
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-
 namespace Randoms.SceneManagerEditorWindow
 {
-   using Randoms.SceneManagerUtil;
-
-   public class SceneEditorWindow : EditorWindow {
-   
-    string searchText = "";
-    Vector2 scrollPos;
-
-    void OnGUI() => RenderWindow();
-
-    /// <summary>
-    /// Render main window
-    /// </summary>
-    private void RenderWindow ()
-    {
-
-      var scenesInfo = SceneManagerUtil.GetFilesInfoOfType ("*.unity");
-      SceneManagerUtil.FileInfo[] filterInfo = scenesInfo.Where (scene => scene.fileName.ToLower ().Contains (searchText.ToLower())).ToArray ();
-      
-      scrollPos = EditorGUILayout.BeginScrollView(scrollPos, true, false, GUILayout.Width(this.position.width ), GUILayout.Height(this.position.height));
-      Header(filterInfo);
-      
-      if (filterInfo.Length  == 0)
+  using Randoms.SceneManagerUtil;
+  public class SceneManagerWindow : EditorWindow
+  {
+      string searchText = "";
+      Vector2 scrollPos;
+      static int lastFilesLength;
+  
+      /// <summary>
+      /// This is called as soon as you open the project in Unity
+      /// and after script compilations
+      /// </summary>
+      [InitializeOnLoadMethod]
+      private static void Init()
       {
-        GUILayout.Button ("Not Found", EditorStyles.centeredGreyMiniLabel);
+        RemoveSpaceFromFilesName ();
+        UpdateSceneManagerScript ();
       }
-   
-      foreach (SceneManagerUtil.FileInfo info in filterInfo) 
+      
+      /// <summary>
+      /// Removes space from files name
+      /// </summary>
+      private static void RemoveSpaceFromFilesName ()
       {
-        GUILayout.BeginHorizontal();
-        GUILayout.Space (30);
-        
-        // if (GUILayout.Button(info.fileName, UnityEditor.EditorStyles.miniButtonMid, GUILayout.Width(300)))
-        if (SceneManagerUtil.GUIButton (info.fileName, Color.white, Color.white, 12, 300))
+        lastFilesLength = SceneManagerUtil.GetFilesOfType ("*.unity").Length;
+        foreach (string path in SceneManagerUtil.GetFilesOfType ("*.unity"))
         {
-          EditorSceneManager.OpenScene (info.relativepath);
+          FileInfo fileInfo = new FileInfo (path);
+          fileInfo.MoveTo(fileInfo.Directory.FullName + "\\" + fileInfo.Name.Replace (" ", "_"));  
         }
         
-        GUILayout.Space (30);
-        
-        
-        GUILayout.Space (3);
-        if (SceneManagerUtil.GUIButton ("+", Color.green, Color.green, 20, 20))
+        foreach (string path in SceneManagerUtil.GetFilesOfType ("*.unity.meta"))
         {
-          SceneManagerUtil.AddSceneToBuild (info.relativepath);
+          FileInfo fileInfo = new FileInfo (path);
+          fileInfo.MoveTo(fileInfo.Directory.FullName + "\\" + fileInfo.Name.Replace (" ", "_"));  
+        }
+        // AssetDatabase.Refresh ();
+      } 
+  
+      /// <summary>
+      /// Draws Scene Manager Window 
+      /// MenuItem: https://hugecalf-studios.github.io/unity-lessons/lessons/editor/menuitem/
+      // %	Ctrl/Command #	Shift &	Alt _	None
+      /// </summary>
+      [MenuItem ("Randoms/SceneManager #s")]
+      private static void DrawWindow ()
+      {
+        bool drawFixedWindow = false;
+        EditorWindow window = GetWindow(typeof(SceneManagerWindow),drawFixedWindow,"Scene Manager");
+        window.Show();
+      }
+
+      /// <summary>
+      /// reloads project
+      /// </summary>
+      [MenuItem ("Randoms/Reload #r")]
+      private static void ReloadProject ()
+      {
+        UpdateSceneManagerScript();
+        AssetDatabase.Refresh ();
+      }
+      
+      /// <summary>
+      /// GUI startup
+      /// </summary>
+      private void OnGUI ()
+      {
+        SceneLoaderWindow ();
+        if (lastFilesLength != SceneManagerUtil.GetFilesOfType ("*.unity").Length)
+        {
+          RemoveSpaceFromFilesName ();
+          UpdateSceneManagerScript ();
+        }
+      }
+      
+      /// <summary>
+      /// Scene Loader Ui Renderer
+      /// </summary>
+      private void SceneLoaderWindow ()
+      {
+        var scenesPath = SceneManagerUtil.BuildScenesPath ();
+        var filterScenesPath = scenesPath.Where (path => {
+         return SceneManagerUtil.GetSceneName(path).ToLower().Contains (searchText.ToLower());
+        }).ToArray();
+        
+        GUILayout.Space (10);
+  
+        if (scenesPath.Count == 0)
+        {
+         GUILayout.Label("Warning : No Scene Added So Far", EditorStyles.helpBox);
+         if (GUILayout.Button ("Add Scenes"))
+         {
+          EditorWindow window = GetWindow (typeof (BuildPlayerWindow));
+          window.Show ();
+         }
+        }
+        else 
+        {
+          searchText = SceneManagerUtil.LabeledTextField ("Search Scene : ", searchText, 5);
+          if (filterScenesPath.Length == 0)
+          {
+           GUILayout.Button ("Not Found", EditorStyles.centeredGreyMiniLabel);
+          }
+        }
+  
+        scrollPos = GUILayout.BeginScrollView(scrollPos, false, false, GUIStyle.none, GUI.skin.verticalScrollbar);
+        GUILayout.Space (10);
+  
+        foreach (var scenePath in filterScenesPath)
+        {
+          GUILayout.BeginHorizontal ();
+          GUILayout.Space (5);
+          if (GUILayout.Button (SceneManagerUtil.GetSceneName(scenePath), EditorStyles.miniButton)) 
+          {
+            EditorSceneManager.OpenScene (scenePath);
+          } 
+  
+          GUILayout.Space (5);
+          if (SceneManagerUtil.GUIButton ("-",Color.white,Color.white,Color.red,30,30))
+          {
+            SceneManagerUtil.RemoveSceneFromBuild (scenePath);
+            AssetDatabase.SaveAssets ();
+          }
+  
+          GUILayout.Space (5);
+          GUILayout.EndHorizontal ();
+          GUILayout.Space (5);
+        }
+  
+        GUILayout.Space (20);
+        EditorGUILayout.EndScrollView ();
+        
+        GUILayout.Space (20);
+        
+        GUILayout.BeginHorizontal ();
+         
+        GUILayout.Space (10);
+        if (GUILayout.Button ("Open Scene Editor",EditorStyles.miniButtonMid))
+        {
+          searchText = "";
+          EditorWindow window = GetWindow (typeof (SceneEditorWindow), true);
+          window.Show ();
+        }
+        
+        GUILayout.Space (10);
+        if (GUILayout.Button ("Refresh", EditorStyles.miniButtonMid,GUILayout.Width (60)))
+        {
+          searchText = "";
+          UpdateSceneManagerScript();
           AssetDatabase.SaveAssets ();
         }
         
-        var redBtnStyle = new GUIStyle (EditorStyles.miniButtonMid);
-        redBtnStyle.normal.textColor = Color.red;
-        
-        GUILayout.Space (3);
-        if (SceneManagerUtil.GUIButton ("-", Color.red, Color.red, 20, 20))
-        {  
-          SceneManagerUtil.RemoveSceneFromBuild(info.relativepath);
-          AssetDatabase.SaveAssets ();
+        GUILayout.Space (10);
+        if (GUILayout.Button ("Reload", EditorStyles.miniButtonMid, GUILayout.Width (60)))
+        {
+          searchText = "";
+          UpdateSceneManagerScript();
+          AssetDatabase.Refresh ();
         }
-        
-        GUILayout.Space (3);
-        // if (GUILayout.Button("Focus", UnityEditor.EditorStyles.miniButtonMid, GUILayout.Width(50)))
-        if (SceneManagerUtil.GUIButton ("Focus", Color.grey, Color.gray, 12))
-        {  
-          SceneManagerUtil.FocusOnPath (info.relativepath);
-        }
-   
-        GUILayout.EndHorizontal();
-      }
-   
-      GUILayout.Space (10);
-      GUILayout.Label("SceneManager Window", EditorStyles.centeredGreyMiniLabel);   
-      EditorGUILayout.EndScrollView();  
-
-    }
-    
-    /// <summary>
-    /// Window Header
-    /// </summary>
-    private void Header (SceneManagerUtil.FileInfo[] filterInfos)
-    {
-
-      GUILayout.Space (30);
-      GUILayout.BeginHorizontal ();
-      GUILayout.Space (30);
-      if (SceneManagerUtil.GUIButton ("Show Build", Color.white, Color.white, 12, 140))
+  
+        GUILayout.Space (10);
+        GUILayout.EndHorizontal ();
+        GUILayout.Label("SceneManager Window", EditorStyles.centeredGreyMiniLabel);  
+        GUILayout.Space (5);
+      } 
+  
+      /// <summary>
+      /// Updates changes in script
+      /// </summary>
+      private static void UpdateSceneManagerScript ()
       {
-        EditorWindow window = GetWindow (typeof (BuildPlayerWindow),false);
-        window.Show ();
+        string scriptPath = SceneManagerUtil.GetScriptPath ("SceneLoaderManager.cs");
+        if (scriptPath == "") return;
+        string fileContent = File.ReadAllText (scriptPath);
+        string newSceneNameEnum = "";
+        foreach (string path in SceneManagerUtil.BuildScenesPath()) 
+         newSceneNameEnum += "   " + SceneManagerUtil.GetSceneName (path) + ",\n";
+        newSceneNameEnum.Remove (newSceneNameEnum.Length - 1); 
+        SceneManagerUtil.UpdateSceneLoaderScript (scriptPath, newSceneNameEnum);
       }
       
-      GUILayout.Space (5); 
-      if (SceneManagerUtil.GUIButton ("Add All", Color.green, Color.green, 12, 140))
+      /// <summary>
+      /// On Winow UnFocus
+      /// </summary>
+      void OnLostFocus()
       {
-        // var scenesInfo = SceneManagerUtil.GetFilesInfoOfType ("*.unity");
-        // filterInfos.ForEach (scene => SceneManagerUtil.AddSceneToBuild (scene.relativepath));
-        foreach (SceneManagerUtil.FileInfo info in filterInfos) SceneManagerUtil.AddSceneToBuild (info.relativepath);
-        AssetDatabase.SaveAssets ();
+        GUI.FocusControl (null);
       }
-      
-      GUILayout.Space (5); 
-      if (SceneManagerUtil.GUIButton ("Remove All", Color.red, Color.red, 12, 140))
-      {
-        // var scenesInfo = SceneManagerUtil.GetFilesInfoOfType ("*.unity");
-        // scenesInfo.ForEach (scene => SceneManagerUtil.RemoveSceneFromBuild (scene.relativepath));
-        foreach (SceneManagerUtil.FileInfo info in filterInfos) SceneManagerUtil.RemoveSceneFromBuild (info.relativepath);
-        AssetDatabase.SaveAssets ();
-      }
-   
-      GUILayout.EndHorizontal ();
-   
-      GUILayout.Space (20);
-      searchText = SceneManagerUtil.LabeledTextField ("Search Scene : " , searchText);
-      GUILayout.BeginHorizontal();
-      if (filterInfos.Length > 0) GUILayout.Button ("Scenes",EditorStyles.centeredGreyMiniLabel,GUILayout.Width (300));
-      GUILayout.EndHorizontal ();
-      GUILayout.Space (5);
-
-    }
-    
-    /// <summary>
-    /// On Winow UnFocus
-    /// </summary>
-    void OnLostFocus()
-    {
-      GUI.FocusControl (null);
-    }
-
   }
 }
-
 #endif
