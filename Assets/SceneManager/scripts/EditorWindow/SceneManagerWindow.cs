@@ -1,4 +1,4 @@
-﻿
+
 /*
   OPEN_SOURCE
   Contribute on GitHub : https://github.com/Zain-ul-din/UnityScripting
@@ -63,6 +63,16 @@ namespace Randoms.SceneManagerEditorWindow
         bool drawFixedWindow = false;
         EditorWindow window = GetWindow(typeof(SceneManagerWindow),drawFixedWindow,"Scene Manager");
         window.Show();
+      }
+
+      /// <summary>
+      /// reloads project
+      /// </summary>
+      [MenuItem ("Randoms/Reload #r")]
+      private static void ReloadProject ()
+      {
+        UpdateSceneManagerScript();
+        AssetDatabase.Refresh ();
       }
       
       /// <summary>
@@ -151,6 +161,7 @@ namespace Randoms.SceneManagerEditorWindow
         if (GUILayout.Button ("Refresh", EditorStyles.miniButtonMid,GUILayout.Width (60)))
         {
           searchText = "";
+          UpdateSceneManagerScript();
           AssetDatabase.SaveAssets ();
         }
         
@@ -158,6 +169,7 @@ namespace Randoms.SceneManagerEditorWindow
         if (GUILayout.Button ("Reload", EditorStyles.miniButtonMid, GUILayout.Width (60)))
         {
           searchText = "";
+          UpdateSceneManagerScript();
           AssetDatabase.Refresh ();
         }
   
